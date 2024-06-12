@@ -47,16 +47,19 @@ def create():
 
 
 def get_post(id, check_author=True):
-    post = None  # TODO remove if you strart with assignment
-    # TODO
-    # post = get_db().execute(
-    #     '',
-    #     ()
-    # ).fetchone()
+    # Teosta SQL päring postituse leidmiseks
+    post = get_db().execute(
+        'SELECT p.id, title, body, created, author_id, username'
+        ' FROM post p JOIN user u ON p.author_id = u.id'
+        ' WHERE p.id = ?',
+        (id,)
+    ).fetchone()
 
+    # Kui postitust ei leitud, viska 404 viga
     if post is None:
         abort(404, f"Post id {id} doesn't exist.")
 
+    # Kui `check_author` on True, kontrolli, et kasutaja on autor
     if check_author and post['author_id'] != g.user['id']:
         abort(403)
 
@@ -80,11 +83,11 @@ def update(id):
             flash(error)
         else:
             db = get_db()
-            ##TODO implement
-            # db.execute(
-            #     '',
-            #     ()
-            # )
+            # Täida SQL päring postituse uuendamiseks
+            db.execute(
+                'UPDATE post SET title = ?, body = ? WHERE id = ?',
+                (title, body, id)
+            )
             db.commit()
             return redirect(url_for('blog.index'))
 
